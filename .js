@@ -1,123 +1,89 @@
-function startTicTacToe() {
+const statusDisplay = document.querySelector('.game--status');
 
-    for (i = 1; i <= 9; i++) {
-    
-    clearGrid(i);
-    
+let gameActive = true;
+let currentPlayer = "X";
+let gameState = ["", "", "", "", "", "", "", "", ""];
+
+const winningMessage = () => `Player ${currentPlayer} has won!`;
+const drawMessage = () => `Game ended in a draw!`;
+const currentPlayerTurn = () => `It's ${currentPlayer}'s turn`;
+
+statusDisplay.innerHTML = currentPlayerTurn();
+
+const winningConditions = [
+    [0, 1, 2],
+    [3, 4, 5],
+    [6, 7, 8],
+    [0, 3, 6],
+    [1, 4, 7],
+    [2, 5, 8],
+    [0, 4, 8],
+    [2, 4, 6]
+];
+
+function handleCellPlayed(clickedCell, clickedCellIndex) {
+    gameState[clickedCellIndex] = currentPlayer;
+    clickedCell.innerHTML = currentPlayer;
+}
+
+function handlePlayerChange() {
+    currentPlayer = currentPlayer === "X" ? "O" : "X";
+    statusDisplay.innerHTML = currentPlayerTurn();
+}
+
+function handleResultValidation() {
+    let roundWon = false;
+    for (let i = 0; i <= 7; i++) {
+        const winCondition = winningConditions[i];
+        let a = gameState[winCondition[0]];
+        let b = gameState[winCondition[1]];
+        let c = gameState[winCondition[2]];
+        if (a === '' || b === '' || c === '') {
+            continue;
+        }
+        if (a === b && b === c) {
+            roundWon = true;
+            break
+        }
     }
-    
-    document.player = "X";
-    
-    document.winner = null;
-    
-    message(document.player + " will start the game");
-    
+
+    if (roundWon) {
+        statusDisplay.innerHTML = winningMessage();
+        gameActive = false;
+        return;
     }
-    
-    function getGrid(number) {
-    
-    return document.getElementById("b" + number).innerText;
-    
+
+    let roundDraw = !gameState.includes("");
+    if (roundDraw) {
+        statusDisplay.innerHTML = drawMessage();
+        gameActive = false;
+        return;
     }
-    
-    function message(msg) {
-    
-    document.getElementById("message").innerText = msg;
-    
+
+    handlePlayerChange();
+}
+
+function handleCellClick(clickedCellEvent) {
+    const clickedCell = clickedCellEvent.target;
+    const clickedCellIndex = parseInt(clickedCell.getAttribute('data-cell-index'));
+
+    if (gameState[clickedCellIndex] !== "" || !gameActive) {
+        return;
     }
-    
-    function nextMove(box) {
-    
-    if (document.winner !== null) {
-    
-    message(document.player + " already won");
-    
-    } else if (box.innerText === "") {
-    
-    box.innerText = document.player;
-    
-    nextTurn();
-    
-    } else {
-    
-    message("Choose another box");
-    
-    }
-    
-    }
-    
-    function clearGrid(number) {
-    
-    document.getElementById("b" + number).innerText = "";
-    
-    }
-    
-    function winnerCheck(move) {
-    
-    var result = false;
-    
-    if (
-    
-    rowCheck(1, 2, 3, move) ||
-    
-    rowCheck(4, 5, 6, move) ||
-    
-    rowCheck(7, 8, 9, move) ||
-    
-    rowCheck(1, 4, 7, move) ||
-    
-    rowCheck(2, 5, 8, move) ||
-    
-    rowCheck(3, 6, 9, move) ||
-    
-    rowCheck(1, 5, 9, move) ||
-    
-    rowCheck(3, 5, 7, move)
-    
-    ) {
-    
-    result = true;
-    
-    }
-    
-    return result;
-    
-    }
-    
-    function nextTurn() {
-    
-    if (winnerCheck(document.player)) {
-    
-    message(document.player + ", has won!");
-    
-    document.winner = document.player;
-    
-    } else if (document.player == "X") {
-    
-    document.player = "O";
-    
-    message("It's " + document.player + "'s turn");
-    
-    } else {
-    
-    document.player = "X";
-    
-    message("It's " + document.player + "'s turn");
-    
-    }
-    
-    }
-    
-    function rowCheck(a, b, c, move) {
-    
-    var result = false;
-    
-    if (getGrid(a) == move && getGrid(b) == move && getGrid(c) == move) {
-    
-    result = true;
-    
-    }
-    
-    return result;
-    
-    }
+
+    handleCellPlayed(clickedCell, clickedCellIndex);
+    handleResultValidation();
+}
+
+function handleRestartGame() {
+    gameActive = true;
+    currentPlayer = "X";
+    gameState = ["", "", "", "", "", "", "", "", ""];
+    statusDisplay.innerHTML = currentPlayerTurn();
+    document.querySelectorAll('.cell').forEach(cell => cell.innerHTML = "");
+}
+
+
+document.querySelectorAll('.cell').forEach(cell => cell.addEventListener('click', handleCellClick));
+document.querySelector('.game--restart').addEventListener('click', handleRestartGame);
+ 
